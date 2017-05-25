@@ -1,6 +1,6 @@
 <?php
 $br = (php_sapi_name() == "cli")? "":"<br>";
-
+//
 if(!extension_loaded('base62')) {
 	dl('base62.' . PHP_SHLIB_SUFFIX);
 }
@@ -18,4 +18,11 @@ if (extension_loaded($module)) {
 	$str = "Module $module is not compiled into PHP";
 }
 echo "$str\n";
+$str = base62_encode(123);
+echo "base62_encode = $str\n";
+    
+$str = base62_decode($str);
+    
+echo "base62_decode = $str\n";
+
 ?>

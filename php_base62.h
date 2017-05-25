@@ -21,6 +21,8 @@
 #ifndef PHP_BASE62_H
 #define PHP_BASE62_H
 
+char* substr(char* str,int start,int end);
+long int strpos(const char* str,char c);
 extern zend_module_entry base62_module_entry;
 #define phpext_base62_ptr &base62_module_entry
 

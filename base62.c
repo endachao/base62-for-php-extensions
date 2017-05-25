@@ -27,13 +27,18 @@
 #include "ext/standard/info.h"
 #include "php_base62.h"
 
+#include <math.h>
+#include <string.h>
+#include <stdlib.h>
+
 /* If you declare any globals in php_base62.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(base62)
 */
 
 /* True global resources - no need for thread safety here */
 static int le_base62;
-
+static char randStr[] = "vPh7zZwA2LyU4bGq5tcVfIMxJi6XaSoK9CNp0OWljYTHQ8REnmu31BrdgeDkFs";
+char *encodeStr = NULL;
 /* {{{ PHP_INI
  */
 /* Remove comments and fill if you need to have entries in php.ini
@@ -46,20 +51,50 @@ PHP_INI_END()
 
 
 PHP_FUNCTION(base62_encode){
-}
-
-PHP_FUNCTION(base62_decode){
-    char *arg = NULL;
-    size_t arg_len;
-    zend_string *str;
     
-    if(zend_parse_parameters(ZEND_NUM_ARGS(),"s",&arg,&arg_len) == FAILURE){
+    int number;
+    size_t arg_len;
+    zend_string *strg;
+    
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &number, &arg_len) == FAILURE) {
         return;
     }
     
-    str = strpprintf(0,"base62_decode(%s)",arg);
+    int forNumber = floor(log10(number) / log10(62));
+    encodeStr = ecalloc(forNumber + 2,sizeof(char *));
+    int t = forNumber;
+    for(t;t>=0;t--){
+        int a = floor(number / pow(62, t));
+        char *str = substr(randStr,a, 1);
+        strcat(encodeStr,str);
+        efree(str);
         
-    RETURN_STR(str);
+        number = number - (a * pow(62, t));
+    }
+    strg = strpprintf(0,"%s",encodeStr);
+    RETURN_STR(strg);
+}
+
+PHP_FUNCTION(base62_decode){
+    char *encodeStr = NULL;
+    size_t arg_len;
+    zend_string *str;
+    
+    if(zend_parse_parameters(ZEND_NUM_ARGS(),"s",&encodeStr,&arg_len) == FAILURE){
+        return;
+    }
+    
+    int number = 0;
+    int stringLength = (unsigned int)strlen(encodeStr) - 1;
+    int t = 0;
+    
+    for(t;t<=stringLength;t++){
+        char *searchChar = substr(encodeStr, t, 1);
+        number = number + strpos(randStr,*searchChar) * pow(62, stringLength - t);
+        efree(searchChar);
+    }
+    
+    RETURN_LONG(number);
 }
 
 /* Remove the following function when you have successfully modified config.m4
@@ -141,6 +176,7 @@ PHP_RINIT_FUNCTION(base62)
  */
 PHP_RSHUTDOWN_FUNCTION(base62)
 {
+    efree(encodeStr);
 	return SUCCESS;
 }
 /* }}} */
@@ -170,6 +206,40 @@ const zend_function_entry base62_functions[] = {
 	PHP_FE_END	/* Must be the last line in base62_functions[] */
 };
 /* }}} */
+
+char* substr(char* string,int start,int length){
+    
+    char *outString = ecalloc(length + 1,sizeof(char*));
+    
+    int stringLength = (unsigned int)strlen(string);
+    
+    if(length > stringLength){
+        return string;
+    }
+    
+    if(start > stringLength){
+        start = 0;
+    }
+    
+    strncpy(outString,string+start,length);
+//    printf("outString = %s\n",outString);
+    return outString;
+}
+
+long int strpos(const char* str,char c){
+    long int pos = 0;
+    
+    char * stringInPos;
+    stringInPos = strchr(str, c);
+    
+    
+    if(stringInPos != NULL){
+        //        printf("stringInPos - str = %ld\n",stringInPos - str);
+        pos = stringInPos - str;
+    }
+    
+    return pos;
+}
 
 /* {{{ base62_module_entry
  */

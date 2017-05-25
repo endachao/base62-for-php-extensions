@@ -1,0 +1,13 @@
+// $Id$
+// vim:ft=javascript
+
+// If your extension references something external, use ARG_WITH
+// ARG_WITH("base62", "for base62 support", "no");
+
+// Otherwise, use ARG_ENABLE
+// ARG_ENABLE("base62", "enable base62 support", "no");
+
+if (PHP_BASE62 != "no") {
+	EXTENSION("base62", "base62.c", PHP_EXTNAME_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+}
+

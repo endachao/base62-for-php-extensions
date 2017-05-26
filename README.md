@@ -28,3 +28,19 @@ service php-fpm restart
 
 ```
 
+## Usage
+
+```
+
+# encode
+
+string base62_encode(int number);
+$str = base62_encode(123);
+
+# decode
+
+int base62_decode(string str);
+$str = base62_decode($str);
+
+
+```
